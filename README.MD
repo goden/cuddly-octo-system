@@ -94,6 +94,5 @@
 1. 環境需求：
     - VS Code (最新版本)
     - GitHub Copilot 訂閱帳號 (具備 Custom Agent / MCP 支援權限)
-
     -  Node.js / Python 環境（用於撰寫自訂 Skills 與 MCP Server/Hooks 腳本）
 2. 學習節奏：建議每週完成 1~2 個 Unit，每個 Unit 都包含「30% 觀念理解 + 70% 實作練習」。
