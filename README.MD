@@ -20,12 +20,9 @@
   └── Unit 6: 綜合實戰——打造自動化代碼審查與架構師 Agent 體系
 ```
 
-## Phase 1: 基礎核心實作（Foundation & Skills）
+# Phase 1: 基礎核心實作（Foundation & Skills）
 
-### Phase 1: 基礎核心實作（Foundation & Skills）
-
-Unit 1: Prompt Files 與 System Instructions 基礎實力建構
-
+## Unit 1: Prompt Files 與 System Instructions 基礎實力建構
 - 學習目標：理解 Custom Agent 的基石，學會如何透過 
 ```.github/copilot-instructions.md 與 Prompt Files (.prompt.md) 為 AI 設定角色與標準作業流程。```
 - 核心概念：
@@ -35,3 +32,13 @@ Unit 1: Prompt Files 與 System Instructions 基礎實力建構
     - 在專案根目錄建立 ```.github/copilot-instructions.md```，設定團隊程式碼規範（如：命名原則、錯誤處理邏輯）。
     - 建立 ```.vscode/prompts/refactor-security.prompt.md```，定義一個專門進行「安全性與效能重構」的提問模板，使用 context 變數引導 Copilot 解析目前開啟的檔案。
 - 產出物：第一個具備團隊專案記憶與標準範本的 VS Code 變更配置。
+
+## Unit 2: Agent Skills 模組化擴充
+- 學習目標：學會將常用的指令、API 調用或腳本封裝成 Skills，讓 Copilot 能根據語意動態選用技能。
+- 核心概念：
+    - kill 的結構：定義輸入 (Input Parameters)、處理邏輯 (Execution) 與輸出結構 (Output Format)。
+    - 工具選用 (Tool Calling)：Agent 如何判斷何時調用特定 Skill 來完成任務。
+- 實作任務 (Hands-on Lab)：
+    - 建立一個 check-bundle-size 技能：當使用者詢問「這個變更會影響打包大小嗎？」時，Agent 能觸發背景腳本檢查建置檔體積。
+    - 建立一個 generate-db-migration 技能：根據 Schema 修改自動輸出資料庫 Migration 腳本。
+- 產出物：具備自主呼叫本機腳本/工具能力的 Custom Agent。
