@@ -77,3 +77,23 @@
     - 撰寫一個 post-generation Hook：當 Agent 產生語法錯誤或含有敏感資安資訊（如硬編碼 API Key）時，自動攔截並要求 Agent 重新修正。
     - 撰寫一個 pre-generation Hook：自動將現有開檔的 Git Diff 作為 Context 注入給 Agent。
 - 產出物：具備自我修復與強制品質規範的自動化防護網。
+
+## Unit 6: 綜合實戰——終極專案：自動化 Code Review 與 Feature 開發體系
+- 學習目標：綜合全課所學，從零建構一套完整可用於實際工作流程的客製化 Agent 系統。
+- 專案目標：打造一套 「需求到 PR 一站式 AI 助手」。
+- 系統架構與實作步驟：
+    1. 配置 MCP：連接 GitHub 及專案專屬資料庫。
+    2. 編寫 Agents：
+        - @planner：讀取 GitHub Issue，產出 Task Breakdown。
+        - @implementer：調用 Prompt Files 與 Skills 產生程式碼與單元測試。
+        - @reviewer：透過 Hook 執行 post-check，自動產出 Code Review 報告。
+    3. 自動化測試與優化：實際給定一個 Feature Issue，測試整個 Multi-Agent 體系能否順利完成交付。
+- 結業產出：一套可直接應用於個人或企業專案的 VS Code Custom Agent 設定檔與腳本庫。
+
+# 課程學習建議與環境準備
+1. 環境需求：
+    - VS Code (最新版本)
+    - GitHub Copilot 訂閱帳號 (具備 Custom Agent / MCP 支援權限)
+
+    -  Node.js / Python 環境（用於撰寫自訂 Skills 與 MCP Server/Hooks 腳本）
+2. 學習節奏：建議每週完成 1~2 個 Unit，每個 Unit 都包含「30% 觀念理解 + 70% 實作練習」。
