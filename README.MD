@@ -65,3 +65,15 @@
     - 設定 .vscode/mcp.json，串接 PostgreSQL / SQLite MCP Server 與 GitHub MCP Server。
     - 讓 Agent具備「查詢真實資料庫 Schema」與「直接讀取線上 GitHub Issue」的能力。
 - 產出物：具備讀取實體系統數據、打破 AI 資訊孤島的完全體 Agent。
+
+# Phase 3: 自動化與企業實務（Hooks & Capstone Project）
+
+## Unit 5: GitHub Copilot Hooks 自動化生命週期
+- 學習目標：掌握 GitHub Copilot Hooks 機制，在 Agent 生成程式碼的前、中、後階段插入自動化檢查與校正邏輯。
+- 核心概念：
+    - Hook 生命週期：pre-generation（提示詞校正/補充 context）、post-generation（生成內容 Lint 檢查/自動格式化）。
+    - 品質守門員 (Quality Gates)：確保 AI 生成的程式碼在進入編輯器前即符合安全與語法標準。
+- 實作任務 (Hands-on Lab)：
+    - 撰寫一個 post-generation Hook：當 Agent 產生語法錯誤或含有敏感資安資訊（如硬編碼 API Key）時，自動攔截並要求 Agent 重新修正。
+    - 撰寫一個 pre-generation Hook：自動將現有開檔的 Git Diff 作為 Context 注入給 Agent。
+- 產出物：具備自我修復與強制品質規範的自動化防護網。
