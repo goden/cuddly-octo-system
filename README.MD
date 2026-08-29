@@ -42,3 +42,26 @@
     - 建立一個 check-bundle-size 技能：當使用者詢問「這個變更會影響打包大小嗎？」時，Agent 能觸發背景腳本檢查建置檔體積。
     - 建立一個 generate-db-migration 技能：根據 Schema 修改自動輸出資料庫 Migration 腳本。
 - 產出物：具備自主呼叫本機腳本/工具能力的 Custom Agent。
+
+# Phase 2: 進階協作與擴充（Multi-Agent & MCP）
+
+## Unit 3: 多 Agent 協作機制 (Multi-Agent Workflows)
+- 學習目標：告別「單一 Agent 處理所有事」的模式，學會定義專職 Agent（如：@planner, @coder, @reviewer）並建立流暢的切換與協作鏈。
+- 核心概念：
+    - Agent 職責分離 (SoC)：將複雜任務拆解給不同特化的 Agent。
+    - Handoff & Sub-agent 呼叫：Agent 之間的上下文傳遞與接棒機制。
+- 實作任務 (Hands-on Lab)：
+    - 定義 @architect Agent：負責分析需求、輸出系統設計 Markdown。
+    - 定義 @coder Agent：讀取 @architect 的 Markdown 規格書，產生高品質程式碼。
+    - 實作任務接棒：嘗試以指令讓 @architect 設計完後自動呼叫 @coder 進行實作。
+- 產出物：一套能在 VS Code Chat 中互相傳遞上下文、分工合作的 Agent 團隊。
+
+## Unit 4: MCP Registry 系統整合與外部生態串接
+- 學習目標：理解 Model Context Protocol (MCP)，學會從 MCP Registry 導入現成生態系統，並將 Custom Agent 連接到資料庫、GitHub API 或第三方 SaaS。
+- 核心概念：
+    - MCP 架構：Host (VS Code)、Client 與 Server (MCP Provider) 之間的溝通原理。
+    - MCP Registry 與 Local Config：如何在 VS Code 輕鬆安裝與管理 MCP Server。
+- 實作任務 (Hands-on Lab)：
+    - 設定 .vscode/mcp.json，串接 PostgreSQL / SQLite MCP Server 與 GitHub MCP Server。
+    - 讓 Agent具備「查詢真實資料庫 Schema」與「直接讀取線上 GitHub Issue」的能力。
+- 產出物：具備讀取實體系統數據、打破 AI 資訊孤島的完全體 Agent。
