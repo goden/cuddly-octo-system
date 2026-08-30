@@ -8,16 +8,16 @@
 
 ``` bash
 【第一階段：基礎核心實作】
-  ├── Unit 1: Instructions & Prompt Files 基礎打造
-  └── Unit 2: Agent Skills 模組化擴充
+  ├── Unit 1: Instructions & Prompt Files (Java 8/TS 程式碼規範與情境範本)
+  └── Unit 2: Agent Skills 模組化擴充 (TypeScript/Node.js 工具整合)
 
-【第二階段：進階協作與擴充】
-  ├── Unit 3: 多 Agent 協作與切換機制 (Multi-Agent Workflows)
-  └── Unit 4: MCP Registry 系統整合與工具串接
+【第二階段：進階協作與深度技術】
+  ├── Unit 3: 多 Agent 協作機制 (Java 後端與 TS 前端分工鏈)
+  └── Unit 4: MCP (Model Context Protocol) 系統整合與技術深掘 [深度技術區]
 
-【第三階段：自動化與企業實務】
-  ├── Unit 5: GitHub Copilot Hooks 自動化生命週期
-  └── Unit 6: 綜合實戰——打造自動化代碼審查與架構師 Agent 體系
+【第三階段：生命週期控管與實戰】
+  ├── Unit 5: GitHub Copilot Hooks 自動化審核機制 [深度技術區]
+  └── Unit 6: 綜合實戰——Java 8 + TypeScript 全棧功能自動化開發體系
 ```
 
 # Phase 1: 基礎核心實作（Foundation & Skills）
@@ -56,27 +56,186 @@
     - 實作任務接棒：嘗試以指令讓 @architect 設計完後自動呼叫 @coder 進行實作。
 - 產出物：一套能在 VS Code Chat 中互相傳遞上下文、分工合作的 Agent 團隊。
 
-## Unit 4: MCP Registry 系統整合與外部生態串接
-- 學習目標：理解 Model Context Protocol (MCP)，學會從 MCP Registry 導入現成生態系統，並將 Custom Agent 連接到資料庫、GitHub API 或第三方 SaaS。
-- 核心概念：
-    - MCP 架構：Host (VS Code)、Client 與 Server (MCP Provider) 之間的溝通原理。
-    - MCP Registry 與 Local Config：如何在 VS Code 輕鬆安裝與管理 MCP Server。
-- 實作任務 (Hands-on Lab)：
-    - 設定 .vscode/mcp.json，串接 PostgreSQL / SQLite MCP Server 與 GitHub MCP Server。
-    - 讓 Agent具備「查詢真實資料庫 Schema」與「直接讀取線上 GitHub Issue」的能力。
-- 產出物：具備讀取實體系統數據、打破 AI 資訊孤島的完全體 Agent。
+## Unit 4: Model Context Protocol (MCP) 架構與技術深掘
+
+MCP 是由 Anthropic 提出的開放標準，用於解決 LLM 與外部資料/工具之間的標準化溝通問題。在 VS Code Custom Agent 體系中，MCP 是讓 Agent 安全讀取企業級資料庫與 Java/TS 系統架構的核心通道。
+
+1. MCP 通訊架構與傳輸層 (Transport Layer)
+- JSON-RPC 2.0 協定：MCP 採用 JSON-RPC 2.0 作為訊息傳播標準。
+- 傳輸機制 (Transports)：
+    - Stdio Transport：VS Code 以子處理程序 (Subprocess) 啟動 MCP Server，透過 stdin/stdout 進行低延遲通訊（適合本機開發工具）。
+    - SSE Transport (Server-Sent Events)：透過 HTTP + SSE 實現遠端 MCP Server 串接（適合跨服務或企業內部集中式 MCP 服務）。
+    ``` bash
+    +-----------------------------------------------------------------------+
+    | VS Code Host (Copilot Custom Agent)                                   |
+    |   |                                                                   |
+    |   +-- JSON-RPC 2.0 (stdio / SSE) --> MCP Server (TypeScript / Java)  |
+    |                                         |                             |
+    |                                         +---> PostgreSQL / DB (Java 8)|
+    |                                         +---> AST / Parser (TS / Java)|
+    +-----------------------------------------------------------------------+
+    ```
+
+2. MCP 三大核心能力 (Capabilities)
+| 原語 (Primitive) | 說明 | 應用情境 (Java 8/TS) |
+|---|---|---|
+| Resources | 提供唯讀的資料/上下文內容 (Read-only Data) |讀取專案內的 Java 8 DAO / Entity 設定、TypeScript Type Definitions、資料庫 Schema。|
+| Prompts | 預先定義的提問模板與上下文組合 | 提供如「Java 8 遺留代碼重構至 Lambda / Stream API」的標準分析模板。 |
+| Tools | LLM 可主動觸發的執行可執行函式 (Executable Functions) | 執行 mvn test、呼叫 Java AST 解析器、觸發 TypeScript Lint 與 Compile 檢查。 |
+
+3. MCP TypeScript SDK 實作範例
+
+使用 @modelcontextprotocol/sdk 建構一個能解析 Java 8 Class 結構的 MCP Tool：
+
+``` typescript
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { z } from "zod";
+
+const server = new Server(
+  { name: "java8-analyzer-mcp", version: "1.0.0" },
+  { capabilities: { tools: {} } }
+);
+
+// 註冊 Tool
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: [
+    {
+      name: "analyze_java8_class",
+      description: "解析 Java 8 檔案的 Class 結構與依賴關係",
+      inputSchema: {
+        type: "object",
+        properties: {
+          filePath: { type: "string", description: "Java 檔案絕對路徑" }
+        },
+        required: ["filePath"]
+      }
+    }
+  ]
+}));
+
+// 處理 Tool 執行邏輯
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  if (request.params.name === "analyze_java8_class") {
+    const filePath = String(request.params.arguments?.filePath);
+    // 可呼叫 Java AST 模組或執行內部腳本解析
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({ status: "success", parsedMethods: ["findAll()", "findById(Long id)"] })
+        }
+      ]
+    };
+  }
+  throw new Error("Tool not found");
+});
+
+async function run() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+run();
+```
+
+4. VS Code 設定檔整合 (.vscode/mcp.json)
+
+``` json
+{
+  "mcpServers": {
+    "java-backend-mcp": {
+      "command": "node",
+      "args": ["${workspaceFolder}/tools/mcp-server/dist/index.js"],
+      "env": {
+        "JAVA_HOME": "/usr/lib/jvm/java-8-openjdk"
+      }
+    }
+  }
+}
+```
+
 
 # Phase 3: 自動化與企業實務（Hooks & Capstone Project）
 
-## Unit 5: GitHub Copilot Hooks 自動化生命週期
-- 學習目標：掌握 GitHub Copilot Hooks 機制，在 Agent 生成程式碼的前、中、後階段插入自動化檢查與校正邏輯。
-- 核心概念：
-    - Hook 生命週期：pre-generation（提示詞校正/補充 context）、post-generation（生成內容 Lint 檢查/自動格式化）。
-    - 品質守門員 (Quality Gates)：確保 AI 生成的程式碼在進入編輯器前即符合安全與語法標準。
-- 實作任務 (Hands-on Lab)：
-    - 撰寫一個 post-generation Hook：當 Agent 產生語法錯誤或含有敏感資安資訊（如硬編碼 API Key）時，自動攔截並要求 Agent 重新修正。
-    - 撰寫一個 pre-generation Hook：自動將現有開檔的 Git Diff 作為 Context 注入給 Agent。
-- 產出物：具備自我修復與強制品質規範的自動化防護網。
+## Unit 5: GitHub Copilot Hooks 自動化生命週期與質量守門
+
+Hooks 是嵌入在 AI 生成流程（Generation Lifecycle）中的攔截與自動化機制。透過 Hooks，我們能強制讓 Agent 生成的 Java 8 或 TypeScript 程式碼通過語法檢查、資安掃描，並自動注入上下文。
+
+1. Hooks 生命週期流轉 (Lifecycle Sequence)
+``` mermaid
+[使用者提問] 
+    │
+    ▼
+┌──────────────────────────┐
+│  Pre-Generation Hook     │ ──> 注入現有 Git Diff / TypeScript 型別檔
+└──────────────────────────┘
+    │
+    ▼
+[ LLM 接收 Prompt 並產生程式碼 ]
+    │
+    ▼
+┌──────────────────────────┐
+│  Post-Generation Hook    │ ──> 執行 tsc --noEmit / Java 語法審核
+└──────────────────────────┘
+    │
+    ├─► 語法檢驗通過 ──> 輸出至 VS Code 編輯器
+    └─► 語法檢驗失敗 ──> 觸發 Auto-Fix 重新交給 LLM 修正
+```
+
+2. Pre-Generation Hook (語境擴充與自動注入)
+- 目的：在 Prompt 送出前，自動掃描並加入相關 Context（例如：將當前開啟的 TypeScript interface 定義或 Java 8 DTO 帶入）。
+- 應用情境：撰寫 TypeScript 前端時，自動尋找同名的 Java 8 API Response DTO 並將其作為 Prompt 的輸入參數。
+
+3. Post-Generation Hook (語法與資安守門員)
+- 目的：攔截 LLM 生成的 Code Block，並使用靜態分析工具進查。
+- 技術檢驗規則 (Quality Gates)：
+    1. Java 8 相容性檢查：禁止使用 Java 9+ 語法（如 List.of()、var 關鍵字），確保編譯通過。
+    2. TypeScript Strict Type 檢查：不允許產生 any 型別。
+    3. 機密資訊過濾：使用 Regex 攔截潛在硬編碼 API Key / DB Password。
+
+4. Node.js (TypeScript) 撰寫 Post-Generation Hook 邏輯範例
+``` typescript
+// hooks/post-generation-check.ts
+import * as fs from 'fs';
+import { execSync } from 'child_process';
+
+interface HookPayload {
+  generatedCode: string;
+  languageId: string;
+}
+
+export async function main() {
+  const inputPayload: HookPayload = JSON.parse(fs.readFileSync(0, 'utf-8'));
+
+  // 1. 檢驗 Java 8 語法規範
+  if (inputPayload.languageId === 'java') {
+    if (inputPayload.generatedCode.includes('var ') || inputPayload.generatedCode.includes('List.of(')) {
+      console.error(JSON.stringify({
+        status: 'rejected',
+        reason: '檢測到非 Java 8 語法（使用了 var 或 List.of），請重新重構為 Java 8 標準語法。'
+      }));
+      process.exit(1);
+    }
+  }
+
+  // 2. 檢驗 TypeScript 規範
+  if (inputPayload.languageId === 'typescript') {
+    if (inputPayload.generatedCode.includes(': any')) {
+      console.error(JSON.stringify({
+        status: 'rejected',
+        reason: '違反嚴格型別規範：禁止使用 ": any"，請定義具體 Interface 或 Generic 型別。'
+      }));
+      process.exit(1);
+    }
+  }
+
+  console.log(JSON.stringify({ status: 'approved' }));
+  process.exit(0);
+}
+
+main();
+```
 
 ## Unit 6: 綜合實戰——終極專案：自動化 Code Review 與 Feature 開發體系
 - 學習目標：綜合全課所學，從零建構一套完整可用於實際工作流程的客製化 Agent 系統。
