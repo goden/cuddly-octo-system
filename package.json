@@ -1,7 +1,7 @@
 {
   "name": "cluddy-octo-system",
   "version": "1.0.0",
-  "description": "Team Java8 & TS Agent Skills.",
+  "description": "Team Java 8 & TS Agent Skills.",
   "publisher": "Gordon",
   "engines": {
     "vscode": "^1.90.0"
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/goden/cuddly-octo-system.git"
+    "url": "https://github.com/goden/cuddly-octo-system.git"
   },
   "license": "ISC",
   "author": "Gordon",
